@@ -14,6 +14,8 @@ import com.zeroc.Ice.Util;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     Button btnObtenerPeso;
+    Button btnMotorTime;
+    static String action;
     Communicator communicator;
     ObjectPrx objPrx;
 
@@ -29,25 +31,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnObtenerPeso=findViewById(R.id.id_get_weight);
         btnObtenerPeso.setOnClickListener(this);
 
+        btnMotorTime=findViewById(R.id.id_motor_time);
+        btnMotorTime.setOnClickListener(this);
+
         communicator=Util.initialize();
         nPort="10000";
-        nHost="";
+        nHost="localhost";
         identify="SimpleMotor";
         objPrx = communicator.stringToProxy(identify+":tcp -h "+nHost+" -p "+nPort);
 
     }
+    /*
 
+    void givefood(int weight);
+    int getContainerFood();
+    int getFoodEated();
+    bool eatingNow();
+
+    */
     @Override
     public void onClick(View v) {
-        InternetAsyncTask AsyncT=new InternetAsyncTask();
+        InternetAsyncTask AsyncT;
         switch(v.getId()){
             case R.id.id_get_weight:
+                AsyncT=new InternetAsyncTask();
                 AsyncT.execute("getWeight");
-            case R.id.id_on_motor:
+            case R.id.id_motor_time:
+                AsyncT=new InternetAsyncTask();
                 AsyncT.execute("motorTime");
                 break;
+            default:
+                break;
         }
+
     }
+
+
 
     class InternetAsyncTask extends AsyncTask<String,Void,String> {
 
@@ -58,9 +77,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (strings[0]){
                 case "getWeight":
                     params=String.valueOf(sensor.getWeight());
+                    action=strings[0];
                     break;
                 case "motorTime":
                     sensor.motorTime("2");
+                    action=strings[0];
+                    break;
+                case "giveFood":
+                    sensor.givefood(12);
+                    action=strings[0];
                     break;
             }
             return params;
@@ -69,9 +94,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPostExecute(String string){
             if (string==null){
-                Toast.makeText(MainActivity.this,"No se obtuvo ningun resultado",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,"No se realizó ninguna acción",Toast.LENGTH_SHORT).show();
             }else{
-                Toast.makeText(MainActivity.this,"Resultado: "+string,Toast.LENGTH_SHORT).show();
+                switch (action) {
+                    case "getWeigth":
+                        Toast.makeText(MainActivity.this,"Peso actual: "+string,Toast.LENGTH_SHORT).show();
+                        break;
+                    case "giveFood":
+                        Toast.makeText(MainActivity.this,"Comida dispensada"+string,Toast.LENGTH_SHORT).show();
+                        break;
+                    case "motorTime":
+                        Toast.makeText(MainActivity.this,"Funcionamiento de motor finalizado"+string,Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        break;
+                }
+
             }
 
         }
