@@ -15,6 +15,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button btnObtenerPeso;
     Button btnMotorTime;
+    Button btnGetFoodEated;
+    Button btnEatingNow;
+    Button btnGiveFood;
+
     static String action;
     Communicator communicator;
     ObjectPrx objPrx;
@@ -34,6 +38,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMotorTime=findViewById(R.id.id_motor_time);
         btnMotorTime.setOnClickListener(this);
 
+        btnGetFoodEated=findViewById(R.id.id_get_food_eated);
+        btnGetFoodEated.setOnClickListener(this);
+
+        btnEatingNow=findViewById(R.id.id_eating_now);
+        btnEatingNow.setOnClickListener(this);
+
+        btnGiveFood=findViewById(R.id.id_give_food);
+        btnGiveFood.setOnClickListener(this);
+
         communicator=Util.initialize();
         nPort="10000";
         nHost="192.168.101.46";
@@ -43,10 +56,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     /*
 
-    void givefood(int weight);
-    int getContainerFood();
-    int getFoodEated();
-    bool eatingNow();
+        *void motorTime(string time);
+        *void givefood(int weight);
+        int getContainerFood();
+        int getFoodEated();
+        *bool eatingNow();
+        *int getWeight();
 
     */
     @Override
@@ -60,6 +75,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.id_motor_time:
                 AsyncT=new InternetAsyncTask();
                 AsyncT.execute("motorTime");
+                break;
+            case R.id.id_get_food_eated:
+                AsyncT=new InternetAsyncTask();
+                AsyncT.execute();
+                break;
+            case R.id.id_eating_now:
+                AsyncT=new InternetAsyncTask();
+                Toast.makeText(this,"Realizando consulta...",Toast.LENGTH_SHORT).show();
+                AsyncT.execute("eatingNow");
+                break;
+            case R.id.id_give_food:
+                AsyncT=new InternetAsyncTask();
+                Toast.makeText(MainActivity.this,"Dispensando comida...",Toast.LENGTH_SHORT).show();
+                AsyncT.execute("giveFood");
                 break;
             default:
                 break;
@@ -76,6 +105,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (strings[0]){
                 case "getWeight":
                     params=String.valueOf(sensor.getWeight());
+                    action=strings[0];
+                    break;
+                case "motorTime":
+                    sensor.motorTime("5");
+                    action=strings[0];
+                    break;
+                case "getFoodEated":
+                    sensor.getFoodEated();
+                    action=strings[0];
+                    break;
+                case "giveFood":
+                    sensor.givefood(300);
+                    action=strings[0];
+                    break;
+                case "eatingNow":
+                    if(sensor.eatingNow())
+                        params="true";
+                    else
+                        params="false";
                     action=strings[0];
                     break;
             }
@@ -96,6 +144,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         break;
                     case "motorTime":
                         Toast.makeText(MainActivity.this,"Funcionamiento de motor finalizado"+string,Toast.LENGTH_SHORT).show();
+                        break;
+                    case "getFoodEated":
+                        Toast.makeText(MainActivity.this,""+string,Toast.LENGTH_SHORT).show();
+                        break;
+                    case "eatingNow":
+                        if (string.equals("true"))
+                            Toast.makeText(MainActivity.this,"La mascota está comiendo",Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this,"La mascota no está comiendo",Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         break;
