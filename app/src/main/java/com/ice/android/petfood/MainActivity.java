@@ -36,9 +36,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         communicator=Util.initialize();
         nPort="10000";
-        nHost="localhost";
-        identify="SimpleMotor";
-        objPrx = communicator.stringToProxy(identify+":tcp -h "+nHost+" -p "+nPort);
+        nHost="192.168.101.46";
+        identify="SensorControl";
+        objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
 
     }
     /*
@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.id_get_weight:
                 AsyncT=new InternetAsyncTask();
                 AsyncT.execute("getWeight");
+                break;
             case R.id.id_motor_time:
                 AsyncT=new InternetAsyncTask();
                 AsyncT.execute("motorTime");
@@ -65,8 +66,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
-
 
     class InternetAsyncTask extends AsyncTask<String,Void,String> {
 
@@ -79,14 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     params=String.valueOf(sensor.getWeight());
                     action=strings[0];
                     break;
-                case "motorTime":
-                    sensor.motorTime("2");
-                    action=strings[0];
-                    break;
-                case "giveFood":
-                    sensor.givefood(12);
-                    action=strings[0];
-                    break;
             }
             return params;
         }
@@ -97,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this,"No se realizó ninguna acción",Toast.LENGTH_SHORT).show();
             }else{
                 switch (action) {
-                    case "getWeigth":
+                    case "getWeight":
                         Toast.makeText(MainActivity.this,"Peso actual: "+string,Toast.LENGTH_SHORT).show();
                         break;
                     case "giveFood":
