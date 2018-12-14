@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         communicator=Util.initialize();
         nPort="10000";
-        nHost="localhost";
+        nHost="192.168.43.152";
         identify="SensorControl";
         objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         builder=new AlertDialog.Builder(this);
 
         EditText input=new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
         builder.setView(input);
 
         builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
@@ -70,20 +72,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String txt=input.getText().toString();
                 String[] paramsForAsyncT;
                 InternetAsyncTask AsyncT;
-                switch (action) {
-                    case "motorTime":
-                        AsyncT = new InternetAsyncTask();
-                        paramsForAsyncT = new String[]{"motorTime", txt};
-                        AsyncT.execute(paramsForAsyncT);
-                        break;
-                    case "giveFood":
-                        AsyncT = new InternetAsyncTask();
-                        Toast.makeText(getApplicationContext(),"Dispensando comida...",Toast.LENGTH_SHORT).show();
-                        paramsForAsyncT = new String[]{"giveFood",txt};
-                        AsyncT.execute(paramsForAsyncT);
-                        break;
-                    default:
-                        break;
+                if (!txt.isEmpty()) {
+                    switch (action) {
+                        case "motorTime":
+                            AsyncT = new InternetAsyncTask();
+                            paramsForAsyncT = new String[]{"motorTime", txt};
+                            AsyncT.execute(paramsForAsyncT);
+                            break;
+                        case "giveFood":
+                            AsyncT = new InternetAsyncTask();
+                            Toast.makeText(getApplicationContext(), "Dispensando comida...", Toast.LENGTH_SHORT).show();
+                            paramsForAsyncT = new String[]{"giveFood", txt};
+                            AsyncT.execute(paramsForAsyncT);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         });
@@ -146,31 +150,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         protected String doInBackground(String... strings) {
-//            SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
+            SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
             String params=null;
             switch (strings[0]){
                 case "getWeight":
-//                    params=String.valueOf(sensor.getWeight());
+                    params=String.valueOf(sensor.getWeight());
                     action=strings[0];
                     break;
                 case "motorTime":
-//                    sensor.motorTime("5");
+                    sensor.motorTime(strings[1]);
                     action=strings[0];
-                    params=strings[1];
                     break;
                 case "getFoodEated":
-//                    sensor.getFoodEated();
+                    sensor.getFoodEated();
                     action=strings[0];
                     break;
                 case "giveFood":
-//                    sensor.givefood(300);
+                    sensor.givefood(Integer.parseInt(strings[1]));
                     action=strings[0];
-                    params=strings[1];
                     break;
                 case "eatingNow":
-//                    if(sensor.eatingNow())
+                    if(sensor.eatingNow())
                         params="true";
-//                    else
+                    else
                         params="false";
                     action=strings[0];
                     break;
