@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Communicator communicator;
     ObjectPrx objPrx;
 
+    Toast toast;
+
     String nHost;
     String nPort;
     String identify;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nHost="192.168.43.152";
         identify="SensorControl";
         objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
+
+
 
         //Builder-----------------------------------------------
         builder=new AlertDialog.Builder(this);
