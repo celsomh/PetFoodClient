@@ -6,11 +6,16 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.ice.android.petfood.slice.PetFoodSensors.SensorControlPrx;
+
 import com.zeroc.Ice.Communicator;
 import com.zeroc.Ice.ObjectPrx;
 import com.zeroc.Ice.Util;
@@ -27,18 +32,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Communicator communicator;
     ObjectPrx objPrx;
 
-    Toast toast;
+    EditText input;
+    TextView textViewIp;
 
     String nHost;
     String nPort;
     String identify;
-    AlertDialog ad;
+    AlertDialog adNumber;
     AlertDialog.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        textViewIp=findViewById(R.id.id_text_view_ip);
 
         btnObtenerPeso=findViewById(R.id.id_get_weight);
         btnObtenerPeso.setOnClickListener(this);
@@ -57,17 +65,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         communicator=Util.initialize();
         nPort="10000";
-        nHost="192.168.43.152";
+        nHost="localhost";
         identify="SensorControl";
         objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
 
-
+        textViewIp.setText(nHost);
 
         //Builder-----------------------------------------------
         builder=new AlertDialog.Builder(this);
 
-        EditText input=new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input=new EditText(this);
         builder.setView(input);
 
         builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
@@ -89,11 +96,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             paramsForAsyncT = new String[]{"giveFood", txt};
                             AsyncT.execute(paramsForAsyncT);
                             break;
+                        case "cambiar ip":
+                            nHost=txt;
+                            objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
+                            textViewIp.setText(nHost);
+                            break;
                         default:
                             break;
                     }
                 }
+
             }
+
         });
 
         builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -103,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        ad =builder.create();
+        adNumber =builder.create();
 
     }
     /* Métodos Ice
@@ -124,10 +138,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AsyncT.execute("getWeight");
                 break;
             case R.id.id_motor_time:
-                ad.setTitle("Dispensar por tiempo");
-                ad.setMessage("Ingrese la cantidad de tiempo (segundos) que desee dispensar");
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                input.setText("");
+                adNumber.setTitle("Dispensar por tiempo");
+                adNumber.setMessage("Ingrese la cantidad de tiempo (segundos) que desee dispensar");
                 action="motorTime";
-                ad.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
+                adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
+
                 break;
             case R.id.id_get_food_eated:
                 AsyncT=new InternetAsyncTask();
@@ -139,22 +156,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AsyncT.execute("eatingNow");
                 break;
             case R.id.id_give_food:
-                ad.setTitle("Dispensar por peso");
-                ad.setMessage("Ingrese la cantidad (gramos) que desee dispensar");
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                input.setText("");
+                adNumber.setTitle("Dispensar por peso");
+                adNumber.setMessage("Ingrese la cantidad (gramos) que desee dispensar");
                 action="giveFood";
-                ad.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
+                adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
+
                 break;
             default:
                 break;
         }
 
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.id_opcion_cambiar_ip:
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                input.setText(nHost);
+                action="cambiar ip";
+                adNumber.setTitle("Cambiar ip");
+                adNumber.setMessage("Ingrese la nueva ip");
+                adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     class InternetAsyncTask extends AsyncTask<String,Void,String> {
-
+        SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
         @Override
         protected String doInBackground(String... strings) {
-            SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
             String params=null;
             switch (strings[0]){
                 case "getWeight":
