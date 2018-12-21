@@ -1,11 +1,13 @@
 package com.ice.android.petfood;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,13 @@ import com.ice.android.petfood.slice.PetFoodSensors.SensorControlPrx;
 import com.zeroc.Ice.Communicator;
 import com.zeroc.Ice.ObjectPrx;
 import com.zeroc.Ice.Util;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -65,7 +74,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         communicator=Util.initialize();
         nPort="10000";
-        nHost="localhost";
+        String ip=readFromFile(this);
+
+        if (ip!=null){
+            nHost=ip;
+        }else{
+            writeToFile("localhost",this);
+            nHost="localhost";
+        }
+
         identify="SensorControl";
         objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
 
@@ -99,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         case "cambiar ip":
                             nHost=txt;
                             objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
+                            writeToFile(txt,MainActivity.this);
                             textViewIp.setText(nHost);
                             break;
                         default:
@@ -120,6 +138,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adNumber =builder.create();
 
     }
+
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("Number_ip.txt", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+        }
+    }
+
+    private String readFromFile(Context context) {
+
+        String ret = null;
+
+        try {
+            InputStream inputStream = context.openFileInput("Number_ip.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {}
+        catch (IOException e) {}
+
+        return ret;
+    }
+
     /* Métodos Ice
         *void motorTime(string time);
         *void givefood(int weight);
