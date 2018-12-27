@@ -1,9 +1,12 @@
 package com.ice.android.petfood;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView textViewComidaRestante;
     ImageView imageViewEstaComiendo;
     ProgressBar progressBarEstaComiendo;
+    ProgressBar progressBarDispensarPorTiempo;
+    ProgressBar progressBarDispensarPorPeso;
 
     String nHost;
     String nPort;
@@ -56,10 +61,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AlertDialog adNumber;
     AlertDialog.Builder builder;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        progressBarDispensarPorPeso=findViewById(R.id.id_progress_bar_dispensar_por_peso);
+        progressBarDispensarPorPeso.setVisibility(View.INVISIBLE);
+
+        progressBarDispensarPorTiempo=findViewById(R.id.id_progress_bar_dispensar_por_tiempo);
+        progressBarDispensarPorTiempo.setProgress(0);
+        progressBarDispensarPorTiempo.setVisibility(View.INVISIBLE);
 
         progressBarEstaComiendo=findViewById(R.id.id_progress_bar_esta_comiendo);
         progressBarEstaComiendo.setVisibility(View.INVISIBLE);
@@ -115,13 +128,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (!txt.isEmpty()) {
                     switch (action) {
                         case "motorTime":
+                            progressBarDispensarPorTiempo.setVisibility(View.VISIBLE);
+                            progressBarDispensarPorTiempo.setMax(Integer.parseInt(txt));
                             AsyncT = new InternetAsyncTask();
                             paramsForAsyncT = new String[]{"motorTime", txt};
                             AsyncT.execute(paramsForAsyncT);
                             break;
                         case "giveFood":
+                            progressBarDispensarPorPeso.setVisibility(View.VISIBLE);
                             AsyncT = new InternetAsyncTask();
-                            Toast.makeText(getApplicationContext(), "Dispensando comida...", Toast.LENGTH_SHORT).show();
                             paramsForAsyncT = new String[]{"giveFood", txt};
                             AsyncT.execute(paramsForAsyncT);
                             break;
@@ -209,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 input.setText("");
                 adNumber.setTitle("Dispensar por tiempo");
-                adNumber.setMessage("Ingrese el numero de segundos");
+                adNumber.setMessage("Ingrese el tiempo en segundos");
                 action="motorTime";
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
                 break;
@@ -263,8 +278,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    class InternetAsyncTask extends AsyncTask<String,Void,String> {
+    class InternetAsyncTask extends AsyncTask<String,Integer,String> {
         //SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
+
         @Override
         protected String doInBackground(String... strings) {
             String params=null;
@@ -276,6 +292,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case "motorTime":
 //                    sensor.motorTime(strings[1]);
+                    int max=Integer.parseInt(strings[1]);
+                    for (int i=1;i<=max;i++) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                        }
+                        publishProgress(i);
+                    }
                     action=strings[0];
                     break;
                 case "getFoodEated":
@@ -284,11 +308,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case "giveFood":
  //                   sensor.givefood(Integer.parseInt(strings[1]));
+                    try {
+                        Thread.sleep(3000);
+                    } catch(InterruptedException e) {}
                     action=strings[0];
                     break;
                 case "eatingNow":
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(3000);
                     } catch(InterruptedException e) {}
  //                   if(sensor.eatingNow())
 //                        params="true"
@@ -305,39 +332,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             return params;
         }
-        //TODO: Guardar datos en JSON. Los datos deben ser dia, cantidad expendida, cantidad de comida en recipiente y cantidad de comida en contenedor
+
+        @Override
+        protected void onProgressUpdate(Integer... integers){
+            progressBarDispensarPorTiempo.setProgress(integers[0]);
+        }
+
         @Override
         protected void onPostExecute(String string){
-            if (string==null){
-                Toast.makeText(MainActivity.this,"No se realizó ninguna acción",Toast.LENGTH_LONG).show();
-            }else{
-                switch (action) {
-                    case "getWeight":
-                        textViewComidaRestante.setText(string+" gr");
-                        break;
-                    case "giveFood":
-                        Toast.makeText(MainActivity.this,"Comida dispensada "+"("+string+")",Toast.LENGTH_LONG).show();
-                        break;
-                    case "motorTime":
-                        Toast.makeText(MainActivity.this,"Funcionamiento de motor finalizado ("+string+")",Toast.LENGTH_LONG).show();
-                        break;
-                    case "getFoodEated":
-                        Toast.makeText(MainActivity.this,"",Toast.LENGTH_LONG).show();
-                        break;
-                    case "eatingNow":
-                        if (string.equals("true"))
-                            imageViewEstaComiendo.setImageResource(R.mipmap.yes_icon);
-                        else
-                            imageViewEstaComiendo.setImageResource(R.mipmap.no_icon);
-                        progressBarEstaComiendo.setVisibility(View.INVISIBLE);
-                        imageViewEstaComiendo.setVisibility(View.VISIBLE);
-                        break;
-                    default:
-                        break;
-                }
+            switch (action) {
+                case "getWeight":
+                    textViewComidaRestante.setText(string+" gr");
+                    break;
+                case "giveFood":
+                    progressBarDispensarPorPeso.setVisibility(View.INVISIBLE);
+                    break;
+                case "motorTime":
+                    progressBarDispensarPorTiempo.setVisibility(View.INVISIBLE);
+                    progressBarDispensarPorTiempo.setProgress(0);
+                    break;
+                case "getFoodEated":
 
+                    Toast.makeText(MainActivity.this,"",Toast.LENGTH_LONG).show();
+                    break;
+                case "eatingNow":
+                    if (string.equals("true"))
+                        imageViewEstaComiendo.setImageResource(R.mipmap.yes_icon);
+                    else
+                        imageViewEstaComiendo.setImageResource(R.mipmap.no_icon);
+                    progressBarEstaComiendo.setVisibility(View.INVISIBLE);
+                    imageViewEstaComiendo.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    break;
             }
-
         }
     }
 }

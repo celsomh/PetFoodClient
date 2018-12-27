@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:style="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingHorizontal="10dp"
     android:paddingVertical="10dp"
@@ -60,6 +60,14 @@
         android:text="Dispensar por tiempo"
         />
 
+    <ProgressBar
+        android:id="@+id/id_progress_bar_dispensar_por_tiempo"
+        android:progress="0"
+        android:min="0"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/id_get_food_eated"
         android:layout_height="wrap_content"
@@ -106,5 +114,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Dispensar por peso" />
+
+    <ProgressBar
+        android:id="@+id/id_progress_bar_dispensar_por_peso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
