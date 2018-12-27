@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -43,6 +46,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     EditText input;
     TextView textViewIp;
+    TextView textViewComidaRestante;
+    ImageView imageViewEstaComiendo;
+    ProgressBar progressBarEstaComiendo;
 
     String nHost;
     String nPort;
@@ -55,7 +61,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        progressBarEstaComiendo=findViewById(R.id.id_progress_bar_esta_comiendo);
+        progressBarEstaComiendo.setVisibility(View.INVISIBLE);
+
+        imageViewEstaComiendo=findViewById(R.id.id_image_view_esta_comiendo);
+
         textViewIp=findViewById(R.id.id_text_view_ip);
+        textViewComidaRestante=findViewById(R.id.id_text_view_comida_restante);
 
         btnObtenerPeso=findViewById(R.id.id_get_weight);
         btnObtenerPeso.setOnClickListener(this);
@@ -76,8 +88,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nPort="10000";
         String ip=readFromFile(this);
 
-        if (ip!=null){
-            nHost=ip;
+        if (ip!=null) {
+            nHost = ip;
         }else{
             writeToFile("localhost",this);
             nHost="localhost";
@@ -180,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         *void motorTime(string time);
         *void givefood(int weight);
         int getContainerFood();
-        int getFoodEated();
+        *int getFoodEated();
         *bool eatingNow();
         *int getWeight();
     */
@@ -197,10 +209,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 input.setText("");
                 adNumber.setTitle("Dispensar por tiempo");
-                adNumber.setMessage("Ingrese la cantidad de tiempo (segundos) que desee dispensar");
+                adNumber.setMessage("Ingrese el numero de segundos");
                 action="motorTime";
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
-
                 break;
             case R.id.id_get_food_eated:
                 AsyncT=new InternetAsyncTask();
@@ -208,6 +219,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.id_eating_now:
                 AsyncT=new InternetAsyncTask();
+                imageViewEstaComiendo.setVisibility(View.INVISIBLE);
+                progressBarEstaComiendo.setVisibility(View.VISIBLE);
                 Toast.makeText(getApplicationContext(),"Realizando consulta...",Toast.LENGTH_SHORT).show();
                 AsyncT.execute("eatingNow");
                 break;
@@ -215,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 input.setText("");
                 adNumber.setTitle("Dispensar por peso");
-                adNumber.setMessage("Ingrese la cantidad (gramos) que desee dispensar");
+                adNumber.setMessage("Ingrese la cantidad en gramos");
                 action="giveFood";
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
 
@@ -229,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
@@ -252,33 +264,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     class InternetAsyncTask extends AsyncTask<String,Void,String> {
-        SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
+        //SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
         @Override
         protected String doInBackground(String... strings) {
             String params=null;
             switch (strings[0]){
                 case "getWeight":
-                    params=String.valueOf(sensor.getWeight());
+                    //params=String.valueOf(sensor.getWeight());
+                    params="123";
                     action=strings[0];
                     break;
                 case "motorTime":
-                    sensor.motorTime(strings[1]);
+//                    sensor.motorTime(strings[1]);
                     action=strings[0];
                     break;
                 case "getFoodEated":
-                    sensor.getFoodEated();
+ //                   sensor.getFoodEated();
                     action=strings[0];
                     break;
                 case "giveFood":
-                    sensor.givefood(Integer.parseInt(strings[1]));
+ //                   sensor.givefood(Integer.parseInt(strings[1]));
                     action=strings[0];
                     break;
                 case "eatingNow":
-                    if(sensor.eatingNow())
-                        params="true";
-                    else
+                    try {
+                        Thread.sleep(5000);
+                    } catch(InterruptedException e) {}
+ //                   if(sensor.eatingNow())
+//                        params="true"
+//                    else
+                    Random dado=new Random();
+                    if (dado.nextInt(2)==1)
                         params="false";
+                    else
+                        params="true";
                     action=strings[0];
+                    break;
+                default:
                     break;
             }
             return params;
@@ -291,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }else{
                 switch (action) {
                     case "getWeight":
-                        Toast.makeText(MainActivity.this,"Peso actual: "+string,Toast.LENGTH_LONG).show();
+                        textViewComidaRestante.setText(string+" gr");
                         break;
                     case "giveFood":
                         Toast.makeText(MainActivity.this,"Comida dispensada "+"("+string+")",Toast.LENGTH_LONG).show();
@@ -304,9 +326,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         break;
                     case "eatingNow":
                         if (string.equals("true"))
-                            Toast.makeText(MainActivity.this,"La mascota está comiendo",Toast.LENGTH_LONG).show();
+                            imageViewEstaComiendo.setImageResource(R.mipmap.yes_icon);
                         else
-                            Toast.makeText(MainActivity.this,"La mascota no está comiendo",Toast.LENGTH_LONG).show();
+                            imageViewEstaComiendo.setImageResource(R.mipmap.no_icon);
+                        progressBarEstaComiendo.setVisibility(View.INVISIBLE);
+                        imageViewEstaComiendo.setVisibility(View.VISIBLE);
                         break;
                     default:
                         break;
