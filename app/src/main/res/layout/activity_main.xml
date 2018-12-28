@@ -39,22 +39,14 @@
             android:text="Comida restante en contenedor" />
 
         <TextView
+            android:id="@+id/id_get_container_food"
             android:textAlignment="center"
             android:textSize="16sp"
-            android:id="@+id/id_get_container_food"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0 gr" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Aviso: Los valores que se entregan son aproximados"
-            android:textAlignment="center"
-            android:textColor="@color/colorRed"
-            android:textSize="13sp"
             android:layout_marginBottom="10dp"
             />
+
     </LinearLayout>
 
     <ScrollView
@@ -62,7 +54,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
-            android:showDividers="middle"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">

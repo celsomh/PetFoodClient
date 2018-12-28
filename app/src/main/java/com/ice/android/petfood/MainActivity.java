@@ -47,7 +47,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     static String action;
     Communicator communicator;
     ObjectPrx objPrx;
+    String nHost;
+    String nPort;
+    String identify;
 
+    TextView textViewComidaContenedor;
     EditText input;
     TextView textViewIp;
     TextView textViewComidaRestante;
@@ -57,9 +61,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ProgressBar progressBarDispensarPorPeso;
     ScrollView scrollView;
 
-    String nHost;
-    String nPort;
-    String identify;
+    String nameFileIP;
+    String nameFileComidaContenedor;
     AlertDialog adNumber;
     AlertDialog.Builder builder;
 
@@ -68,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        textViewComidaContenedor=findViewById(R.id.id_get_container_food);
+
+        nameFileIP="Number_ip.txt";
+        nameFileComidaContenedor="Comida_contenedor.txt";
 
         scrollView=findViewById(R.id.id_scroll_view);
 
@@ -103,13 +111,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         communicator=Util.initialize();
         nPort="10000";
-        String ip=readFromFile(this);
+        String ip=readFromFile(nameFileIP,this);
+        String comidaContenedor=readFromFile(nameFileComidaContenedor,this);
 
         if (ip!=null) {
             nHost = ip;
         }else{
-            writeToFile("localhost",this);
+            writeToFile(nameFileIP,"localhost",this);
             nHost="localhost";
+        }
+
+        if (comidaContenedor!=null){
+            comidaContenedor+=" gr";
+            textViewComidaContenedor.setText(comidaContenedor);
+        }else{
+            writeToFile(nameFileComidaContenedor,"0",this);
+            textViewComidaContenedor.setText("0 gr");
         }
 
         identify="SensorControl";
@@ -147,8 +164,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         case "cambiar ip":
                             nHost=txt;
                             objPrx = communicator.stringToProxy(identify+":default -h "+nHost+" -p "+nPort);
-                            writeToFile(txt,MainActivity.this);
+                            writeToFile(nameFileIP,txt,MainActivity.this);
                             textViewIp.setText(nHost);
+                            break;
+                        case "getContainerFood":
+                            String txtComidaContenedor=readFromFile(nameFileComidaContenedor,MainActivity.this);
+                            int intComidaContendor=Integer.parseInt(txtComidaContenedor);
+                            if (intComidaContendor>0){
+                                int intComidaIngresada=Integer.parseInt(txt);
+                                intComidaContendor+=intComidaIngresada;
+                                txtComidaContenedor=String.valueOf(intComidaContendor);
+                                writeToFile(nameFileComidaContenedor,txtComidaContenedor,MainActivity.this);
+                                txtComidaContenedor+=" gr";
+                                textViewComidaContenedor.setText(txtComidaContenedor);
+                            }else{
+                                writeToFile(nameFileComidaContenedor,txt,MainActivity.this);
+                                txt+=" gr";
+                                textViewComidaContenedor.setText(txt);
+                            }
+
                             break;
                         default:
                             break;
@@ -170,9 +204,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void writeToFile(String data,Context context) {
+    private void writeToFile(String nameFile,String data,Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("Number_ip.txt", Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(nameFile, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
         }
@@ -180,12 +214,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private String readFromFile(Context context) {
+    private String readFromFile(String nameFile, Context context) {
 
         String ret = null;
 
         try {
-            InputStream inputStream = context.openFileInput("Number_ip.txt");
+            InputStream inputStream = context.openFileInput(nameFile);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -276,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.id_opcion_ingresar_comida_al_contenedor:
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 input.setText("");
-                action="Ingresar comida al contenedor";
+                action="getContainerFood";
                 adNumber.setTitle("Ingresar comida al contenedor");
                 adNumber.setMessage("Ingrese la cantidad en gramos");
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
