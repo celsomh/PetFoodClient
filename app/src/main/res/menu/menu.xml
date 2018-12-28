@@ -5,4 +5,10 @@
         android:title="Cambiar IP"
         >
     </item>
+
+    <item
+        android:id="@+id/id_opcion_ingresar_comida_al_contenedor"
+        android:title="Ingresar comida al contenedor"
+        >
+    </item>
 </menu>

@@ -3,121 +3,157 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:style="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingHorizontal="10dp"
     android:paddingVertical="10dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Direccion ip del dispensador (servidor)"
-        android:textColor="@color/colorPrimaryDark"
-        android:textAlignment="center"
-        android:textSize="18dp" />
-
-    <TextView
-        android:id="@+id/id_text_view_ip"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="18dp"
-        />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Aviso: Los valores que se entregan son aproximados"
-        android:textAlignment="center"
-        android:textColor="@color/colorRed"
-        android:textSize="13sp"
-        />
-
-    <Button
-        android:id="@+id/id_get_weight"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Comida restante"/>
-
-    <TextView
-        android:id="@+id/id_text_view_comida_restante"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="20sp"
-        android:text="0 gr"/>
-
-    <Button
-        android:id="@+id/id_motor_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="fill_horizontal"
-        android:text="Dispensar por tiempo"
-        />
-
-    <ProgressBar
-        android:id="@+id/id_progress_bar_dispensar_por_tiempo"
-        android:progress="0"
-        android:min="0"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/id_get_food_eated"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:text="Cuanto ha comido"
-        />
-    
-    <TextView
-        android:id="@+id/id_text_view_cuanto_ha_comido"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimaryDark"
-        android:textAlignment="center"
-        android:text="0 gr"/>
-
-    <Button
-        android:id="@+id/id_eating_now"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="¿Esta comiendo?"/>
-
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ProgressBar
-            android:id="@+id/id_progress_bar_esta_comiendo"
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:text="Direccion ip Dispensador"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAlignment="center"
+            android:textSize="18sp" />
 
-        <ImageView
-            android:id="@+id/id_image_view_esta_comiendo"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/id_text_view_ip"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:text=""
+            android:textAlignment="center"
+            android:textSize="16sp"
             />
 
-    </FrameLayout>
+        <TextView
+            android:textColor="@color/colorPrimaryDark"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Comida restante en contenedor" />
 
-    <Button
-        android:id="@+id/id_give_food"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Dispensar por peso" />
+        <TextView
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:id="@+id/id_get_container_food"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0 gr" />
 
-    <ProgressBar
-        android:id="@+id/id_progress_bar_dispensar_por_peso"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aviso: Los valores que se entregan son aproximados"
+            android:textAlignment="center"
+            android:textColor="@color/colorRed"
+            android:textSize="13sp"
+            android:layout_marginBottom="10dp"
+            />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/id_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:showDividers="middle"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/id_get_weight"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Comida restante en recipiente"/>
+
+            <TextView
+                android:id="@+id/id_text_view_comida_restante"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="20sp"
+                android:text="0 gr"/>
+
+            <Button
+                android:id="@+id/id_motor_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_horizontal"
+                android:text="Dispensar por tiempo"
+                />
+
+            <ProgressBar
+                android:id="@+id/id_progress_bar_dispensar_por_tiempo"
+                android:progress="0"
+                android:min="0"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/id_get_food_eated"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Cuanto ha comido"
+                />
+
+            <TextView
+                android:id="@+id/id_text_view_cuanto_ha_comido"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/colorPrimaryDark"
+                android:textAlignment="center"
+                android:text="0 gr"/>
+
+            <Button
+                android:id="@+id/id_eating_now"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="¿Esta comiendo?"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ProgressBar
+                    android:id="@+id/id_progress_bar_esta_comiendo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+
+                <ImageView
+                    android:id="@+id/id_image_view_esta_comiendo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    />
+
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/id_give_food"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dispensar por peso" />
+
+            <ProgressBar
+                android:id="@+id/id_progress_bar_dispensar_por_peso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

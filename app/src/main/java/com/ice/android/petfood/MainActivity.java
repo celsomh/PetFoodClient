@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ProgressBar progressBarEstaComiendo;
     ProgressBar progressBarDispensarPorTiempo;
     ProgressBar progressBarDispensarPorPeso;
+    ScrollView scrollView;
 
     String nHost;
     String nPort;
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        scrollView=findViewById(R.id.id_scroll_view);
 
         progressBarDispensarPorPeso=findViewById(R.id.id_progress_bar_dispensar_por_peso);
         progressBarDispensarPorPeso.setVisibility(View.INVISIBLE);
@@ -213,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     */
     @Override
     public void onClick(View v) {
-
         InternetAsyncTask AsyncT;
         switch(v.getId()){
             case R.id.id_get_weight:
@@ -241,18 +244,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.id_give_food:
                 input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                scrollView.fullScroll(View.FOCUS_DOWN);
                 input.setText("");
                 adNumber.setTitle("Dispensar por peso");
                 adNumber.setMessage("Ingrese la cantidad en gramos");
                 action="giveFood";
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
-
                 break;
             default:
                 break;
         }
-
-
     }
 
     @Override
@@ -271,7 +272,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 adNumber.setTitle("Cambiar ip");
                 adNumber.setMessage("Ingrese la nueva ip");
                 adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
-
+                return true;
+            case R.id.id_opcion_ingresar_comida_al_contenedor:
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                input.setText("");
+                action="Ingresar comida al contenedor";
+                adNumber.setTitle("Ingresar comida al contenedor");
+                adNumber.setMessage("Ingrese la cantidad en gramos");
+                adNumber.show(); //Muestra un cuadro de diálogo y se redirige según el botón que se presione (aceptar o cancelar)
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
