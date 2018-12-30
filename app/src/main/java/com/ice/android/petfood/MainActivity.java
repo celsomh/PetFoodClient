@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String nPort;
     String identify;
 
+    TextView textViewCuantoHaComido;
     TextView textViewComidaContenedor;
     EditText input;
     TextView textViewIp;
@@ -71,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        textViewCuantoHaComido=findViewById(R.id.id_text_view_cuanto_ha_comido);
 
         textViewComidaContenedor=findViewById(R.id.id_get_container_food);
 
@@ -241,14 +245,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return ret;
     }
 
-    /* Métodos Ice
-        *void motorTime(string time);
-        *void givefood(int weight);
-        int getContainerFood();
-        *int getFoodEated();
-        *bool eatingNow();
-        *int getWeight();
-    */
     @Override
     public void onClick(View v) {
         InternetAsyncTask AsyncT;
@@ -321,8 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     class InternetAsyncTask extends AsyncTask<String,Integer,String> {
-        //SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
-
+        SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
         @Override
         protected String doInBackground(String... strings) {
             String params=null;
@@ -333,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     action=strings[0];
                     break;
                 case "motorTime":
-//                    sensor.motorTime(strings[1]);
+                    int prePeso=sensor.getWeight();
                     int max=Integer.parseInt(strings[1]);
                     for (int i=1;i<=max;i++) {
                         try {
@@ -342,6 +337,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                         publishProgress(i);
                     }
+//                    sensor.motorTime(strings[1]);
+                    int postPeso=sensor.getWeight();
+                    int comidaExpendida=postPeso-prePeso;
+                    params=String.valueOf(comidaExpendida);
                     action=strings[0];
                     break;
                 case "getFoodEated":
@@ -350,23 +349,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case "giveFood":
  //                   sensor.givefood(Integer.parseInt(strings[1]));
-                    try {
-                        Thread.sleep(3000);
-                    } catch(InterruptedException e) {}
                     action=strings[0];
+                    params=strings[1];
                     break;
                 case "eatingNow":
-                    try {
-                        Thread.sleep(3000);
-                    } catch(InterruptedException e) {}
- //                   if(sensor.eatingNow())
+//                   if(sensor.eatingNow())
 //                        params="true"
 //                    else
-                    Random dado=new Random();
-                    if (dado.nextInt(2)==1)
-                        params="false";
-                    else
-                        params="true";
+//                        params="true";
                     action=strings[0];
                     break;
                 default:
@@ -382,19 +372,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         protected void onPostExecute(String string){
+            String txtComidaContenedor;
+            int intComidaContendor;
+            int intComidaExpendida;
             switch (action) {
                 case "getWeight":
                     textViewComidaRestante.setText(string+" gr");
                     break;
                 case "giveFood":
+                    txtComidaContenedor=readFromFile(nameFileComidaContenedor,MainActivity.this);
+                    intComidaContendor=Integer.parseInt(txtComidaContenedor);
+                    intComidaExpendida=Integer.parseInt(string);
+                    intComidaContendor-=intComidaExpendida;
+                    if (intComidaContendor<0){
+                        intComidaContendor=0;
+                    }
+                    txtComidaContenedor=String.valueOf(intComidaContendor);
+                    writeToFile(nameFileComidaContenedor,txtComidaContenedor,MainActivity.this);
+                    txtComidaContenedor+=" gr";
+                    textViewComidaContenedor.setText(txtComidaContenedor);
                     progressBarDispensarPorPeso.setVisibility(View.INVISIBLE);
                     break;
                 case "motorTime":
+                    txtComidaContenedor=readFromFile(nameFileComidaContenedor,MainActivity.this);
+                    intComidaContendor=Integer.parseInt(txtComidaContenedor);
+                    intComidaExpendida=Integer.parseInt(string);
+                    intComidaContendor-=intComidaExpendida;
+                    if (intComidaContendor<0){
+                        intComidaContendor=0;
+                    }
+                    txtComidaContenedor=String.valueOf(intComidaContendor);
+                    writeToFile(nameFileComidaContenedor,txtComidaContenedor,MainActivity.this);
+                    txtComidaContenedor+=" gr";
+                    textViewComidaContenedor.setText(txtComidaContenedor);
                     progressBarDispensarPorTiempo.setVisibility(View.INVISIBLE);
                     progressBarDispensarPorTiempo.setProgress(0);
                     break;
                 case "getFoodEated":
-
+                    textViewCuantoHaComido.setText(string);
                     Toast.makeText(MainActivity.this,"",Toast.LENGTH_LONG).show();
                     break;
                 case "eatingNow":
