@@ -155,9 +155,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         case "motorTime":
                             progressBarDispensarPorTiempo.setVisibility(View.VISIBLE);
                             progressBarDispensarPorTiempo.setMax(Integer.parseInt(txt));
-                            AsyncT = new InternetAsyncTask();
-                            paramsForAsyncT = new String[]{"motorTime", txt};
-                            AsyncT.execute(paramsForAsyncT);
+                            InternetAsyncTask AsyncT2;
+                            AsyncT2 =new InternetAsyncTask();
+                            AsyncT2.execute("motorTime");
+                            paramsForAsyncT=new String[]{"chargeProgressBar",txt};
+                            new InternetAsyncTask().execute(paramsForAsyncT);
                             break;
                         case "giveFood":
                             progressBarDispensarPorPeso.setVisibility(View.VISIBLE);
@@ -317,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     class InternetAsyncTask extends AsyncTask<String,Integer,String> {
-        SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
+//        SensorControlPrx sensor = SensorControlPrx.checkedCast(objPrx);
         @Override
         protected String doInBackground(String... strings) {
             String params=null;
@@ -328,19 +330,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     action=strings[0];
                     break;
                 case "motorTime":
-                    int prePeso=sensor.getWeight();
-                    int max=Integer.parseInt(strings[1]);
-                    for (int i=1;i<=max;i++) {
+ //                   int prePeso=sensor.getWeight();
+//                    sensor.motorTime(strings[1]);
+//                    int postPeso=sensor.getWeight();
+ //                   int comidaExpendida=postPeso-prePeso;
+//                    params=String.valueOf(comidaExpendida);
+
+                    params="100";
+                    action=strings[0];
+                    break;
+                case "chargeProgressBar":
+                    int max = Integer.parseInt(strings[1]);
+                    for (int i = 1; i <= max; i++) {
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                         }
                         publishProgress(i);
                     }
-//                    sensor.motorTime(strings[1]);
-                    int postPeso=sensor.getWeight();
-                    int comidaExpendida=postPeso-prePeso;
-                    params=String.valueOf(comidaExpendida);
                     action=strings[0];
                     break;
                 case "getFoodEated":
@@ -405,6 +412,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     writeToFile(nameFileComidaContenedor,txtComidaContenedor,MainActivity.this);
                     txtComidaContenedor+=" gr";
                     textViewComidaContenedor.setText(txtComidaContenedor);
+                    break;
+                case "chargeProgressBar":
                     progressBarDispensarPorTiempo.setVisibility(View.INVISIBLE);
                     progressBarDispensarPorTiempo.setProgress(0);
                     break;
