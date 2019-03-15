@@ -14,7 +14,8 @@ public class InternetAsyncTask extends AsyncTask<Integer,String,String> {
     Context context;
 
     public InternetAsyncTask(ObjectIce objectIce, Context context){
-        //sensor=objectIce.getSensor();
+        objectIce.prepararConexion();
+        sensor=objectIce.getSensor();
         this.context=context;
         file=new File();
     }

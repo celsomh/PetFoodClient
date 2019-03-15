@@ -19,7 +19,7 @@ public class ObjectIce {
         this.numPort = numPort;
         this.identify = identify;
         communicator= Util.initialize();
-        prepararConexion();
+
     }
 
     public void setNumPort(String numPort){
@@ -37,9 +37,9 @@ public class ObjectIce {
         prepararConexion();
     }
 
-    private void prepararConexion(){
-        //objPrx = communicator.stringToProxy(identify+":default -h "+numHost+" -p "+numPort);
-        //sensor = SensorControlPrx.checkedCast(objPrx);
+    public void prepararConexion(){
+        objPrx = communicator.stringToProxy(identify+":default -h "+numHost+" -p "+numPort);
+        sensor = SensorControlPrx.checkedCast(objPrx);
     }
 
     public String getNumHost(){
