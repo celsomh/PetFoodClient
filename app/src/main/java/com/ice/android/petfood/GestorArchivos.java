@@ -1,6 +1,7 @@
 package com.ice.android.petfood;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -9,43 +10,41 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class File {
+public class GestorArchivos {
 
+    private final String TAG = "GestorArchivos";
 
-    public void writeToFile(String nameFile, String data, Context context) {
+    public void escribir(String nameFile, String data, Context context) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(nameFile, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
         }
     }
 
-    public String readFromFile(String nameFile, Context context) {
-        String ret = null;
+    public String leer(String nameFile, Context context) {
+        String texto = null;
         try {
             InputStream inputStream = context.openFileInput(nameFile);
-
-            if ( inputStream != null ) {
+            if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString = "";
                 StringBuilder stringBuilder = new StringBuilder();
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                while ((receiveString = bufferedReader.readLine()) != null) {
                     stringBuilder.append(receiveString);
                 }
 
                 inputStream.close();
-                ret = stringBuilder.toString();
+                texto = stringBuilder.toString();
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (FileNotFoundException e) {}
-        catch (IOException e) {}
-
-        return ret;
+        return texto;
     }
-
-
 }
