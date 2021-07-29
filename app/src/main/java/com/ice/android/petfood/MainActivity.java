@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String NOMBRE_SHARED_PREFERECES_DATOS_APP = "DatosApp";
     private final String ATRIBUTO_IP = "IP";
     private final String ATRIBUTO_COMIDA_CONTENEDOR = "ComidaContenedor";
-    private final String ATRIBUTO_COMIDA_CONSUMIDA = "ComidaContenedor";
+    private final String ATRIBUTO_COMIDA_CONSUMIDA = "ComidaConsumida";
 
     private SharedPreferences sharedPreferencesDatosApp;
     private SharedPreferences.Editor editorDatosApp;
@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int opcionAEjecutar;
     private String tituloCuadroDialogo;
     private String mensajeCuadroDialogo;
-    private OperacionAsyncTask operacionAsyncTask;
 
     private Button btnObtenerPeso;
     private Button btnMotorTime;
@@ -69,9 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int comidaContenedor = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONTENEDOR, 0);
         tvComidaContenedor.setText(String.valueOf(comidaContenedor));
 
-        String comidaConsumida = sharedPreferencesDatosApp.getString(ATRIBUTO_COMIDA_CONSUMIDA, "0");
+        int comidaConsumida = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONSUMIDA, 0);
         tvComidaConsumida = findViewById(R.id.tv_comida_consumida);
-        tvComidaConsumida.setText(comidaConsumida);
+        tvComidaConsumida.setText(String.valueOf(comidaConsumida));
 
         scrollView = findViewById(R.id.id_scroll_view);
 
@@ -104,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnGiveFood.setOnClickListener(this);
 
         cuadroDialogo = new CuadroDialogo(this, this);
-        //Linea comentada para realizar pruebas
-        //operacionAsyncTask = new OperacionAsyncTask(objetoIce, this, this);
     }
 
     @Override
@@ -114,15 +111,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.btn_get_weight) {
             operacionAsyncTask = new OperacionAsyncTask(objetoIce, this);
             operacionAsyncTask.execute(Opcion.GET_WEIGHT);
-
         } else if (v.getId() == R.id.btn_motor_time) {
-            progressBarDispensarPorTiempo.setVisibility(View.VISIBLE);
             cuadroDialogo.setInputType(InputType.TYPE_CLASS_NUMBER);
             tituloCuadroDialogo = "Dispensar por tiempo";
             mensajeCuadroDialogo = "Ingrese el tiempo en segundos";
             opcionAEjecutar = Opcion.MOTOR_TIME;
             cuadroDialogo.show();
-
         } else if (v.getId() == R.id.btn_get_food_eated) {
             int comidaConsumida = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONSUMIDA, 0);
             tvComidaConsumida.setText(String.valueOf(comidaConsumida));
@@ -132,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             progressBarEstaComiendo.setVisibility(View.VISIBLE);
             operacionAsyncTask.execute(Opcion.EATING_NOW);
         } else if (v.getId() == R.id.btn_give_food) {
-            progressBarDispensarPorPeso.setVisibility(View.VISIBLE);
             cuadroDialogo.setInputType(InputType.TYPE_CLASS_NUMBER);
             scrollView.fullScroll(View.FOCUS_DOWN);
             tituloCuadroDialogo = "Dispensar por peso";
@@ -182,9 +175,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void setRespuesta(String respuesta) {
+        OperacionAsyncTask operacionAsyncTask;
         if (opcionAEjecutar == Opcion.MOTOR_TIME) {
+            progressBarDispensarPorTiempo.setVisibility(View.VISIBLE);
+            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this);
             operacionAsyncTask.execute(Opcion.MOTOR_TIME, Integer.parseInt(respuesta));
         } else if (opcionAEjecutar == Opcion.GIVE_FOOD) {
+            progressBarDispensarPorPeso.setVisibility(View.VISIBLE);
+            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this);
             operacionAsyncTask.execute(Opcion.GIVE_FOOD, Integer.parseInt(respuesta));
         } else if (opcionAEjecutar == Opcion.CAMBIAR_IP) {
             editorDatosApp.putString(ATRIBUTO_IP, respuesta);
@@ -213,12 +211,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (opcionAEjecutar == Opcion.MOTOR_TIME || opcionAEjecutar == Opcion.GIVE_FOOD) {
             int comidaContenedor = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONTENEDOR, 0);
             int comidaExpendida = Integer.parseInt(respuesta);
-            int comidaContendorActualizada = comidaContenedor - comidaExpendida;
+            int comidaContenedorActualizada = comidaContenedor - comidaExpendida;
             //Si el sensor de peso arroja un resultado negativo
-            if (comidaContenedor < 0)
+            if (comidaContenedorActualizada < 0)
                 comidaContenedor = 0;
-            editorDatosApp.putInt(ATRIBUTO_COMIDA_CONTENEDOR, comidaContendorActualizada);
-            tvComidaContenedor.setText(String.valueOf(comidaContendorActualizada));
+            editorDatosApp.putInt(ATRIBUTO_COMIDA_CONTENEDOR, comidaContenedorActualizada);
+            tvComidaContenedor.setText(String.valueOf(comidaContenedorActualizada));
             int comidaConsumida = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONSUMIDA, 0);
             comidaConsumida += comidaExpendida;
             editorDatosApp.putInt(ATRIBUTO_COMIDA_CONSUMIDA, comidaConsumida);

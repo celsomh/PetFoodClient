@@ -3,9 +3,12 @@ package com.ice.android.petfood;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.widget.EditText;
 
 public class CuadroDialogo implements DialogInterface.OnClickListener {
+
+    private final String TAG = "CuadroDialogo";
 
     private AlertDialog alertDialog;
     private AlertDialog.Builder builderAlertDialog;
@@ -38,6 +41,7 @@ public class CuadroDialogo implements DialogInterface.OnClickListener {
                 etEntradaTexto.setText("");
             }
         });
+        builderAlertDialog.setCancelable(false);
     }
 
     public void show() {
