@@ -1,5 +1,7 @@
 package com.ice.android.petfood;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -13,6 +15,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, ICuadroDialogo, IRespuestaPostOperacion {
+
+    private final String NOMBRE_SHARED_PREFERECES_DATOS_APP = "DatosApp";
+    private final String ATRIBUTO_IP = "IP";
+    private final String ATRIBUTO_COMIDA_CONTENEDOR = "ComidaContenedor";
+    private final String ATRIBUTO_COMIDA_CONSUMIDA = "ComidaContenedor";
+
+    private SharedPreferences sharedPreferencesDatosApp;
+    private SharedPreferences.Editor editorDatosApp;
 
     private int opcionAEjecutar;
     private String tituloCuadroDialogo;
@@ -42,35 +52,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ObjetoIce objetoIce;
 
-    private GestorArchivos gestorArchivos;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gestorArchivos = new GestorArchivos();
+        sharedPreferencesDatosApp = getSharedPreferences(NOMBRE_SHARED_PREFERECES_DATOS_APP, Context.MODE_PRIVATE);
+        String IP = sharedPreferencesDatosApp.getString(ATRIBUTO_IP, "localhost");
+        objetoIce = new ObjetoIce(IP, "10000", "SensorControl");
+        tvIP = findViewById(R.id.tv_ip);
+        tvIP.setText(IP);
 
-        objetoIce = new ObjetoIce("localhost", "10000", "SensorControl");
-        String ip = gestorArchivos.leer(NombreArchivos.ARCHIVO_IP, this);
-        if (ip != null)
-            objetoIce.setNumHost(ip);
+        editorDatosApp = sharedPreferencesDatosApp.edit();
 
         tvComidaContenedor = findViewById(R.id.tv_comida_en_contenedor);
+        int comidaContenedor = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONTENEDOR, 0);
+        tvComidaContenedor.setText(String.valueOf(comidaContenedor));
 
-        String comidaContenedor = gestorArchivos.leer(NombreArchivos.ARCHIVO_CONTENEDOR, this);
-        if (comidaContenedor != null)
-            tvComidaContenedor.setText(comidaContenedor);
-
-        String comidaConsumida = gestorArchivos.leer(NombreArchivos.ARCHIVO_COMIDA_CONSUMIDA, this);
-        if (comidaConsumida == null)
-            gestorArchivos.escribir(NombreArchivos.ARCHIVO_COMIDA_CONSUMIDA, "0", this);
-
+        String comidaConsumida = sharedPreferencesDatosApp.getString(ATRIBUTO_COMIDA_CONSUMIDA, "0");
         tvComidaConsumida = findViewById(R.id.tv_comida_consumida);
-
-        tvIP = findViewById(R.id.tv_ip);
-        tvIP.setText(objetoIce.getNumHost());
+        tvComidaConsumida.setText(comidaConsumida);
 
         scrollView = findViewById(R.id.id_scroll_view);
 
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         OperacionAsyncTask operacionAsyncTask;
         if (v.getId() == R.id.btn_get_weight) {
-            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this, this);
+            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this);
             operacionAsyncTask.execute(Opcion.GET_WEIGHT);
 
         } else if (v.getId() == R.id.btn_motor_time) {
@@ -123,11 +124,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             cuadroDialogo.show();
 
         } else if (v.getId() == R.id.btn_get_food_eated) {
-            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this, this);
-            operacionAsyncTask.execute();
-
+            int comidaConsumida = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONSUMIDA, 0);
+            tvComidaConsumida.setText(String.valueOf(comidaConsumida));
         } else if (v.getId() == R.id.btn_eating_now) {
-            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this, this);
+            operacionAsyncTask = new OperacionAsyncTask(objetoIce, this);
             imageViewEstaComiendo.setVisibility(View.INVISIBLE);
             progressBarEstaComiendo.setVisibility(View.VISIBLE);
             operacionAsyncTask.execute(Opcion.EATING_NOW);
@@ -187,21 +187,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (opcionAEjecutar == Opcion.GIVE_FOOD) {
             operacionAsyncTask.execute(Opcion.GIVE_FOOD, Integer.parseInt(respuesta));
         } else if (opcionAEjecutar == Opcion.CAMBIAR_IP) {
-            gestorArchivos.escribir(NombreArchivos.ARCHIVO_IP, respuesta, this);
+            editorDatosApp.putString(ATRIBUTO_IP, respuesta);
+            editorDatosApp.commit();
             //Linea comentada para realizar pruebas
             //objetoIce.setNumHost(respuesta);
             tvIP.setText(respuesta);
         } else if (opcionAEjecutar == Opcion.INGRESAR_COMIDA) {
-            String txtComidaContenedor = gestorArchivos.leer(NombreArchivos.ARCHIVO_CONTENEDOR, this);
-            int intComidaContendor = Integer.parseInt(txtComidaContenedor);
-            if (intComidaContendor > 0) {
-                int intComidaIngresada = Integer.parseInt(respuesta);
-                intComidaContendor += intComidaIngresada;
-                txtComidaContenedor = String.valueOf(intComidaContendor);
-                gestorArchivos.escribir(NombreArchivos.ARCHIVO_CONTENEDOR, txtComidaContenedor, this);
-                tvComidaContenedor.setText(txtComidaContenedor);
+            int comidaContendor = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONTENEDOR, 0);
+            if (comidaContendor > 0) {
+                int comidaIngresada = Integer.parseInt(respuesta);
+                int comidaContendorActualizada = comidaContendor + comidaIngresada;
+                editorDatosApp.putInt(ATRIBUTO_COMIDA_CONTENEDOR, comidaContendorActualizada);
+                editorDatosApp.commit();
+                tvComidaContenedor.setText(String.valueOf(comidaContendorActualizada));
             } else {
-                gestorArchivos.escribir(NombreArchivos.ARCHIVO_CONTENEDOR, respuesta, this);
+                editorDatosApp.putInt(ATRIBUTO_COMIDA_CONTENEDOR, Integer.parseInt(respuesta));
+                editorDatosApp.commit();
                 tvComidaContenedor.setText(respuesta);
             }
         }
@@ -209,22 +210,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void getRespuesta(String respuesta) {
-        int comidaContendor;
-        int comidaExpendida;
         if (opcionAEjecutar == Opcion.MOTOR_TIME || opcionAEjecutar == Opcion.GIVE_FOOD) {
-            String txtComidaContenedor = gestorArchivos.leer(NombreArchivos.ARCHIVO_CONTENEDOR, this);
-            comidaContendor = Integer.parseInt(txtComidaContenedor);
-            comidaExpendida = Integer.parseInt(respuesta);
-            comidaContendor -= comidaExpendida;
-            if (comidaContendor < 0)
-                comidaContendor = 0;
-            txtComidaContenedor = String.valueOf(comidaContendor);
-            gestorArchivos.escribir(NombreArchivos.ARCHIVO_CONTENEDOR, txtComidaContenedor, this);
-            tvComidaContenedor.setText(txtComidaContenedor);
-
-            String txtComidaConsumida = gestorArchivos.leer(NombreArchivos.ARCHIVO_COMIDA_CONSUMIDA, this);
-            int comidaConsumida = Integer.parseInt(txtComidaConsumida) + comidaExpendida;
-            gestorArchivos.escribir(NombreArchivos.ARCHIVO_COMIDA_CONSUMIDA, String.valueOf(comidaConsumida), this);
+            int comidaContenedor = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONTENEDOR, 0);
+            int comidaExpendida = Integer.parseInt(respuesta);
+            int comidaContendorActualizada = comidaContenedor - comidaExpendida;
+            //Si el sensor de peso arroja un resultado negativo
+            if (comidaContenedor < 0)
+                comidaContenedor = 0;
+            editorDatosApp.putInt(ATRIBUTO_COMIDA_CONTENEDOR, comidaContendorActualizada);
+            tvComidaContenedor.setText(String.valueOf(comidaContendorActualizada));
+            int comidaConsumida = sharedPreferencesDatosApp.getInt(ATRIBUTO_COMIDA_CONSUMIDA, 0);
+            comidaConsumida += comidaExpendida;
+            editorDatosApp.putInt(ATRIBUTO_COMIDA_CONSUMIDA, comidaConsumida);
         }
 
         switch (opcionAEjecutar) {
@@ -236,9 +233,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case Opcion.MOTOR_TIME:
                 progressBarDispensarPorTiempo.setVisibility(View.INVISIBLE);
-                break;
-            case Opcion.GET_FOOD_EATED:
-                tvComidaConsumida.setText(respuesta);
                 break;
             case Opcion.EATING_NOW:
                 if (respuesta.equals("true"))

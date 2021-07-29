@@ -8,16 +8,12 @@ import com.ice.android.petfood.slice.PetFoodSensors.SensorControlPrx;
 
 public class OperacionAsyncTask extends AsyncTask<Integer, String, String> {
 
-    private GestorArchivos gestorArchivos;
     private SensorControlPrx sensor;
-    private Context context;
     IRespuestaPostOperacion iRespuestaPostOperacion;
 
-    public OperacionAsyncTask(ObjetoIce objetoIce, IRespuestaPostOperacion iRespuestaPostOperacion, Context context) {
+    public OperacionAsyncTask(ObjetoIce objetoIce, IRespuestaPostOperacion iRespuestaPostOperacion) {
         objetoIce.prepararConexion();
         sensor = objetoIce.getSensor();
-        this.context = context;
-        gestorArchivos = new GestorArchivos();
         this.iRespuestaPostOperacion = iRespuestaPostOperacion;
     }
 
@@ -36,9 +32,6 @@ public class OperacionAsyncTask extends AsyncTask<Integer, String, String> {
                 sensor.motorTime(String.valueOf(dato));
                 int comidaExpendida = prePeso - sensor.getWeight();
                 respuesta = String.valueOf(comidaExpendida);
-                break;
-            case Opcion.GET_FOOD_EATED:
-                respuesta = gestorArchivos.leer(NombreArchivos.ARCHIVO_COMIDA_CONSUMIDA, context);
                 break;
             case Opcion.GIVE_FOOD:
                 dato = integers[1];
